@@ -1,7 +1,7 @@
 import pymongo
 import MongoDBTools
 import multiprocessing as mp
-from typing import List, Dict, AnyStr, Set
+from typing import List, AnyStr
 
 restricted_char = [r'/', r'\\', r'.', r'"', '$', '*', '<', '>', ':', '|', '?']  # list of Mongo restricted characters
 
