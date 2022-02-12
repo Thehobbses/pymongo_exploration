@@ -3,13 +3,11 @@
 
 # libraries and Distributions
 import os
-from pprint import pprint
-from typing import List, Dict, AnyStr, Set
+from typing import AnyStr
 
 # function Modules
 import MongoDBTools
 import PushFunctions
-
 
 # environmental Vars for DB access and data-pathing
 # as far as I can tell, access token generation is not possible in the free version of Atlas
@@ -22,6 +20,16 @@ PASSWORD = os.environ['pmpassword']  # Password for access to the cloud Mongo se
 
 def main(init_db: bool, init_collections: bool, update_index: bool, update_details: bool,
          client_database: AnyStr, index_collection: AnyStr):
+    """
+    main function to execute insertion and extraction of data from MongoDB
+    :param init_db: generate new databases in client
+    :param init_collections: generate new collections in database
+    :param update_index: update data in index collection
+    :param update_details: update data in details collection (user will be prompted to select collection)
+    :param client_database: primary database, if one already exists
+    :param index_collection: index collection name
+    :return: inputs and outputs based on configuration
+    """
 
     # establishing the Mongo client
     uri = f"mongodb+srv://{USER}:{PASSWORD}@jacktestingcluster.z8hzo.mongodb.net/{PMDATABASE}?retryWrites=true&w=majority"
@@ -31,9 +39,16 @@ def main(init_db: bool, init_collections: bool, update_index: bool, update_detai
     if init_db:
         PushFunctions.initiate_database(client=pymongo_client)
 
+    # generate list of existing collections in selected database
+    database_collections = MongoDBTools.grab_collection_list(client=pymongo_client, database=client_database)
+
     # initiate new collections?
     if init_collections:
         PushFunctions.initiate_collections(client=pymongo_client, database=client_database)
+        index_collection = MongoDBTools.select_pymongo_object(
+                pm_obj_list=database_collections,
+                operation_desc=f'Select index collection',
+                pm_obj_desc=f'Collections in {client_database}')
 
     if update_index:
         PushFunctions.push(
@@ -43,16 +58,10 @@ def main(init_db: bool, init_collections: bool, update_index: bool, update_detai
             parent=True, req_key='newspapers', uri=uri)
 
     if update_details:
-        # generate list of existing collections in selected database
-        database_collections = MongoDBTools.grab_collection_list(client=pymongo_client, database=client_database)
-
         # grab list of urls to access
         url_upload_list = MongoDBTools.grab_collection_object_values(
             client=pymongo_client, database=client_database,
-            collection=MongoDBTools.select_pymongo_object(
-                pm_obj_list=database_collections,
-                operation_desc=f'Extract URL list from collection',
-                pm_obj_desc=f'Collections in {client_database}'),
+            collection=index_collection,
             filter_bool=False, object_key={'url': 1})
 
         details_url_list = list()      # list of all URLs to grab details JSONs
@@ -76,4 +85,4 @@ def main(init_db: bool, init_collections: bool, update_index: bool, update_detai
 
 if __name__ == "__main__":
     main(init_db=True, init_collections=True, update_index=True, update_details=True,
-         client_database='Newspapers', index_collection='newspaper_details')
+         client_database='Newspapers', index_collection='newspaper_index_data')
