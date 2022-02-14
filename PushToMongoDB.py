@@ -39,15 +39,15 @@ def main(database_list: List):
     :param database_list: list of dicts containing database and collection parameters
     """
     # validate user inputs
-    MongoDBTools.input_type_governor(database_list)
+    MongoDBTools.push_input_type_governor(database_list)
 
     # establishing the Mongo client
-    pymongo_client = MongoDBTools.pymongo_client(uri)
+    pymongo_client_connection = MongoDBTools.pymongo_client(uri)
 
     for database_dict in database_list:
         # initialize database and collections from details in dictionary
         active_database = MongoDBTools.initiate_database(
-            client=pymongo_client,
+            client=pymongo_client_connection,
             database_str=database_dict['database name'])
 
         index_collection = MongoDBTools.initiate_collection(
@@ -56,7 +56,7 @@ def main(database_list: List):
 
         # grab url from database_dict that links to the index JSON
         index_json_dict = MongoDBTools.parallelized_request(mp_max, [database_dict['url']])
-        index_json_list = [doc for doc in index_json_dict[0][database_dict['objects access key']]]
+        index_json_list = [doc for doc in index_json_dict[0][database_dict['objects access key']]]  # extract objects
 
         # post all records from the index JSON to the index collection
         MongoDBTools.post_documents(documents=index_json_list, collection=index_collection)
@@ -67,10 +67,11 @@ def main(database_list: List):
                 database_obj=active_database,
                 collection=detail_collection['collection name'])
 
-            # grab list of urls to access
+            # grab list of urls to access for details collection
             url_upload_list = MongoDBTools.grab_collection_fields(
                 collection=index_collection,
                 filter_bool=False,
+                push_bool=True,
                 object_key=detail_collection['pymongo index query'])
 
             details_json_list = MongoDBTools.parallelized_request(mp_max, url_upload_list)
@@ -80,13 +81,13 @@ def main(database_list: List):
                                         collection=active_detail_collection)
 
     # close client to prevent accidental billing
-    pymongo_client.close()
+    pymongo_client_connection.close()
 
 
 if __name__ == "__main__":
     try:
         main(mongo_database_list)
     except OperationFailure:
-        pymongo_client = MongoDBTools.pymongo_client(uri)
-        pymongo_client.drop_database('Newspaper')
+        pymongo_client_connection = MongoDBTools.pymongo_client(uri)
+        pymongo_client_connection.drop_database('Newspaper')
         main(mongo_database_list)

@@ -1,12 +1,9 @@
 import os
 from datetime import timedelta
-# The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
-# Operators; we need this to operate!
 from airflow.operators.bash import BashOperator
 from airflow.utils.dates import days_ago
-# These args will get passed on to each operator
-# You can override them on a per-task basis during operator initialization
+
 
 EMAIL = os.environ['email']
 WORKING_DIRECTORY = os.environ['working_dir']

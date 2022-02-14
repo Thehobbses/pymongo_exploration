@@ -1,10 +1,7 @@
-import os
-from time import time
 import requests
 import multiprocessing as mp
 import pymongo as pm
 from pymongo import database
-from pymongo.errors import ConnectionFailure
 from typing import List, Dict, AnyStr, Set
 
 
@@ -55,12 +52,13 @@ def initiate_collection(database_obj: pm.database, collection: AnyStr) -> pm.col
     return collection_obj
 
 
-def grab_collection_fields(collection: pm.collection, filter_bool: bool, object_key: Dict) -> List:
+def grab_collection_fields(collection: pm.collection, filter_bool: bool, push_bool: bool, object_key: Dict) -> List:
     """
     Grabs a set of specified fields from a collection; result is received as a pymongo cursor
     For more detail on structuring object_key: https://docs.mongodb.com/manual/reference/method/db.collection.find/
     :param collection: Mongo collection connection
     :param filter_bool: return selected fields for all objects (F), or objects with field values matching object_key (T)
+    :param push_bool: set to True if used in Push script
     :param object_key: a Mongo formatted dict to return fields based on criteria
     :return: a list of values from all objects in the collection
     """
@@ -72,8 +70,15 @@ def grab_collection_fields(collection: pm.collection, filter_bool: bool, object_
         result = collection.find({}, object_key)
 
     for record in result:
-        cleaned_record = unlist_object(list(record.values()))   # cleaning gross list nesting
-        return_list.append(cleaned_record)  # append values to list for requests
+        cleaned_record = list(record.values())   # cleaning gross list nesting
+
+        if len(cleaned_record) == 1:    # records of length 1 should be passed to return list as their sole value
+            cleaned_record = cleaned_record[0]
+
+        if push_bool:   # push requires cleaned records, pull needs dict keys
+            return_list.append(cleaned_record)
+        else:
+            return_list.append(record)
 
     return return_list
 
@@ -109,9 +114,9 @@ def is_restricted(user_input: AnyStr):
         raise ValueError(f'User Input: {user_input} includes Mongo restricted characters ({restricted_char})')
 
 
-def input_type_governor(database_list: List):
+def push_input_type_governor(database_list: List):
     """
-    parses a list of databases and checks that each field is passing correct data types
+    parses a push list of databases and checks that each field is passing correct data types
     :param database_list: list of dicts containing database and collection parameters
     :return: pass or fail codes
     """
@@ -155,17 +160,37 @@ def input_type_governor(database_list: List):
         index += 1
 
 
-def unlist_object(obj: List):
+def pull_input_type_governor(database_list: List):
     """
-    recursively removes lists around variable, used to clean up dict values
-    :param obj: list or nested lists
-    :return: non-list variable
+    parses a pull list of databases and checks that each field is passing correct data types
+    :param database_list: list of dicts containing database and collection parameters
+    :return: pass or fail codes
     """
-    if not type(obj) == list:
-        raise ValueError(f'passed object must be of type List; object is of type {type(obj)}')
-    while type(obj) == list:
-        obj = obj[0]
-    return obj
+    index = 0   # provides context for failure points when DB list grows in length
+    for database_dict in database_list:
+        db_name = database_dict['database name']
+
+        name_strings = [db_name]
+        index_queries = []
+
+        for objects in database_dict['collections']:
+            dcol_name = objects['collection name']
+            idx_qry = objects['extraction drop fields']
+            name_strings.append(dcol_name)
+            for qry in idx_qry:
+                index_queries.append(qry)
+
+        # check if name fields are strings and include no restricted chars
+        for strings in name_strings:
+            if type(strings) != str:
+                raise ValueError(f'Name in database or collections not of type: string [Dict Index: {index}]')
+            is_restricted(strings)
+
+        # check to see if index collection queries are in valid dict form
+        for queries in index_queries:
+            if type(queries) != dict:
+                raise ValueError(f'Query in details collection pymongo index queries not of type: dict [Dict Index: {index}]')
+        index += 1
 
 
 def request_json(url: AnyStr):
@@ -190,3 +215,40 @@ def parallelized_request(processor_count: int, link_list: List) -> List:
     pool.close()
     return results
 
+
+def year_to_int(year_list: list) -> List:
+    """
+    cleans year lists, converting strings to ints and handling non-numeric inputs
+    0 values will be filtered out of vis and treated as censored records
+    :param year_list: list of string years
+    :return: list of int years
+    """
+    cleaned_year = []
+    for year in year_list:
+        try:
+            cleaned_year.append(int(year))
+        except ValueError:
+            if year == 'current':
+                cleaned_year.append(2022)
+            else:
+                cleaned_year.append(0)
+    return cleaned_year
+
+
+def break_out_daily(collection_obj_list: list, obj_record_key: AnyStr, obj_list_key: AnyStr, value_list_key: AnyStr) -> Dict:
+    """
+    takes daily issue data and generates a dict where each entry is a single day associated with a record
+    :param collection_obj_list: list of objects from collection
+    :param obj_record_key: string key to access correct record value (i.e 'lccn' for LoC Newspapers)
+    :param obj_list_key: string key to access desired list in collection_obj_list
+    :param value_list_key: string key to access desired value in inner list objects
+    :return: flat tab dictionary of daily records
+    """
+    daily_dict = {obj_record_key: [], value_list_key: []}
+
+    for record in collection_obj_list:
+        for day in record[obj_list_key]:
+            daily_dict[obj_record_key].append(record[obj_record_key])
+            daily_dict[value_list_key].append(day[value_list_key])
+
+    return daily_dict
