@@ -1,3 +1,6 @@
+# https://www.youtube.com/watch?v=4tG22Fn_dbI&ab_channel=SpeedSharing
+# https://docs.docker.com/language/python/build-images/
+
 # syntax=docker/dockerfile:1
 
 FROM python:3.9-slim-buster
