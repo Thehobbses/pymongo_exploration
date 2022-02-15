@@ -6,7 +6,7 @@ from airflow.operators import bash
 
 
 EMAIL = os.environ['email']
-WORKING_DIRECTORY = os.environ['working_dir']
+WORKING_DIRECTORY = 'scripts'
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -28,7 +28,12 @@ with models.DAG(
         description='simple pipeline from the Library of Congress',
         schedule_interval=datetime.timedelta(days=1)) as dag:
 
-    # Print the dag_run id from the Airflow logs
+    # run scripts
+    gcs_test = bash.BashOperator(
+        task_id='gcs_test',
+        bash_command=f'{WORKING_DIRECTORY}/gcs_test.py',
+        dag=dag)
+
     push_to_mongo = bash.BashOperator(
         task_id='push_to_mongo',
         bash_command=f'{WORKING_DIRECTORY}/PushToMongoDB.py',
