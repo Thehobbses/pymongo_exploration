@@ -1,4 +1,4 @@
-# Project Impoetus
+# Project Impetus
 
 Project to gain experience with several platforms and skills:
  - Airflow
