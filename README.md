@@ -1,4 +1,4 @@
-# Project Impoetus
+# Project Impetus
 
 Project to gain experience with several platforms and skills:
  - Airflow
@@ -34,3 +34,17 @@ Aside from redundant educational processes, there are a number of things I would
 # The Stuff You Can't See
 
 Clearly, this code relies heavily on MongoDB and Airflow. That means most of the fruits of my labor are not really apparent in the scripts alone. Below are some images that show what is being prodced from this code:
+
+Data pulled from Library of Congress API and pushed to a fresh MongoDB Atlas database:
+
+#### Data loaded into MongoDB
+![Alt text](/documentation/MongoDB_Loaded.png?raw=true "Data loaded into MongoDB")
+#### Index data example
+![Alt text](/documentation/MongoIndex_Loaded.png?raw=true "Index data example")
+#### Details data example
+![Alt text](/documentation/MongoDetail_Loaded.png?raw=true "Details data example")
+
+
+Resulting plot from database query and data transformation using Pandas and MatPlotLib:
+#### Output plot example
+![Alt text](/documentation/newspaper_freq.png?raw=true "Output plot example")
