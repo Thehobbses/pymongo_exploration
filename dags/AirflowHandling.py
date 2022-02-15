@@ -1,19 +1,17 @@
-import os
+# Python Modules
 import datetime
-import airflow
 from airflow import models
-from airflow.operators import bash
+from airflow.operators.python import PythonOperator
 
-
-EMAIL = os.environ['email']
-WORKING_DIRECTORY = 'us-west3-airflow-env-eaaf7ba7-bucket/scripts'
+# DAG modules
+from modules import gcs_test, MongoDBTools, PullFromMongoDB, PushToMongoDB, VisualizationHandling
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 default_args = {
     'owner': 'Jack Hobbs',
     'depends_on_past': False,
-    'email': [EMAIL],
+    'email': 'jackhobbs97@gmail.com',
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 1,
@@ -29,27 +27,27 @@ with models.DAG(
         schedule_interval=datetime.timedelta(days=1)) as dag:
 
     # run scripts
-    gcs_test = bash.BashOperator(
+    gcs_test = PythonOperator(
         task_id='gcs_test',
-        bash_command=f'{WORKING_DIRECTORY}/gcs_test.py',
+        python_callable=gcs_test.main(),
         dag=dag)
 
-    push_to_mongo = bash.BashOperator(
+    push_to_mongo = PythonOperator(
         task_id='push_to_mongo',
-        bash_command=f'{WORKING_DIRECTORY}/PushToMongoDB.py',
+        python_callable=PushToMongoDB.main(PushToMongoDB.mongo_database_list),
         dag=dag)
 
-    pull_from_mongo = bash.BashOperator(
+    pull_from_mongo = PythonOperator(
         task_id='pull_from_mongo',
         depends_on_past=False,
-        bash_command=f'{WORKING_DIRECTORY}/PullFromMongoDB.py',
+        python_callable=PullFromMongoDB.main(PullFromMongoDB.extract_database_list),
         retries=3,
         dag=dag)
 
-    visualize_mongo_data = bash.BashOperator(
+    visualize_mongo_data = PythonOperator(
         task_id='visualize_mongo_data',
         depends_on_past=False,
-        bash_command=f'{WORKING_DIRECTORY}/VisualizationHandling.py',
+        python_callable=VisualizationHandling.main(),
         retries=3,
         dag=dag)
 
