@@ -87,7 +87,7 @@ def main(database_list: List):
 if __name__ == "__main__":
     try:
         main(mongo_database_list)
-    except OperationFailure:
+    except OperationFailure:    # MongoDB has a low storage limit for free accounts so I overwrite data when its full
         pymongo_client_connection = MongoDBTools.pymongo_client(uri)
         pymongo_client_connection.drop_database('Newspaper')
         main(mongo_database_list)

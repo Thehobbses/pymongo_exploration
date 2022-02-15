@@ -1,4 +1,5 @@
 import requests
+import json
 import multiprocessing as mp
 import pymongo as pm
 from pymongo import database
@@ -252,3 +253,16 @@ def break_out_daily(collection_obj_list: list, obj_record_key: AnyStr, obj_list_
             daily_dict[value_list_key].append(day[value_list_key])
 
     return daily_dict
+
+
+def save_dataframes_to_file(dataframes_dicts: dict):
+    """
+    Save data frames as json object for speed, in practice this data would be stored in a queryable service or -
+      saved as json and loaded if accessed frequently but with limited need for refresh
+    :param dataframes_dicts: dictionary of dataframe dictionaries
+    :return: JSON file of dictionaries
+    """
+    df_json_file = json.dumps(dataframes_dicts)
+    json_file_obj = open('dataframe_dicts.json','w')
+    json_file_obj.write(df_json_file)
+    json_file_obj.close()

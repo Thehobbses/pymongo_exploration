@@ -106,7 +106,7 @@ def main(database_list: List):
 
                 active_query_df = pd.DataFrame.from_dict(query_dict)
 
-                # testing pandas lookup functionality
+                # testing pandas lookup functionality by merging state data into daily records
                 if 'issues' in query_cols:
                     lookup_df = pd.DataFrame.from_dict(
                         data=collection_dataframe_dicts['newspaper_index']['newspaper_index-0'])
