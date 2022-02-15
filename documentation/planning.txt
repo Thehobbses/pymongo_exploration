@@ -1,0 +1,31 @@
+Purpose: ingest data from API, push records to NoSQL database, pull those records, transform and visualize data
+
+Requirements: python, airflow, MongoDB
+
+Desired outputs:
+    - Emails: success, or error
+    - Graph on local web app?
+    - Clean, queryable database (maybe also a tabular EDW?)
+
+Rough steps:
+    - launch Airflow
+
+    - execute a push py file
+        - connect to mongo client
+        - parse db dict
+            - catch var type errors
+            - init any new db/collection
+        - request data from API
+        - push to MongoDB
+            - object checking?
+        - close connection
+
+    - execute a pull py file
+        - connect to mongo client
+        - extract data into pandas
+        - transform and visualize based on user dict choices
+        - push visualization/table to web app or something
+        - email with success or failures (configure in Airflow?)
+        - close connection
+
+
