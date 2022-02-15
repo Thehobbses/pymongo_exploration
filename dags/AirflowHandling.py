@@ -6,7 +6,7 @@ from airflow.operators import bash
 
 
 EMAIL = os.environ['email']
-WORKING_DIRECTORY = 'scripts'
+WORKING_DIRECTORY = 'us-west3-airflow-env-eaaf7ba7-bucket/scripts'
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
