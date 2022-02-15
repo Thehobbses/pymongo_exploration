@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 
 
 def main():
+    """
+    imports data from the Mongo database, cleans and visualizes, then saves figure as .png
+    :return: .png figure
+    """
+    # import all data dictionaries by running the Pull script
     dataframes = PullFromMongoDB.main(PullFromMongoDB.extract_database_list)
 
     # grab index dictionary and interpret as df
@@ -21,6 +26,7 @@ def main():
     daily_df['month'] = pd.DatetimeIndex(daily_df['date_issued']).month
     daily_df['state'] = daily_df['state'].astype(object)
 
+    # group data values by year and state to create frequency graphs
     grouped_df = daily_df.groupby(['year', 'state']).size().unstack(fill_value=0)
 
     def pandas_plotter(df: pd.DataFrame):
@@ -49,6 +55,7 @@ def main():
         plt.suptitle(t='Daily Newspapers Published by State')
         return plt
 
+    # plot and save frequency graphs
     plot_obj = pandas_plotter(grouped_df)
     plot_obj.savefig('newspaper_freq.png')
 
