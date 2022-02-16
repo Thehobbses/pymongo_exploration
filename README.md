@@ -22,63 +22,67 @@ I put together a pipeline that:
 
 The pipeline is on a daily schedule, but that is easily adjusted in the DAG file
 
+#### _Note_: this script will not run locally without updating the requirements.txt (because airflow is pre-installed in the Google Composer environment and it gets mad if you include it in your requirements). Once that is done, one would need to get their own MongoDB set up, load their credentials into the env. vars and edit the uri with the connection link Mongo provides
+
 # The Stuff You Can't See
 
-Clearly, this code relies heavily on MongoDB and Airflow. That means most of the fruits of my labor are not really apparent in the scripts alone. Below are some images that show what is being prodced from this code:
+Clearly, this code relies heavily on MongoDB and Airflow. That means most of the fruits of my labor are not really apparent in the scripts alone. Below are some images that show what is being prodced from this code
+
+----------------------------------------------------------------------------------------------------------------------------------------
 
 #### Google Cloud Service environments deployed:
 
 ![Alt text](/documentation/Airflow_DAG_prerun.png?raw=true "DAG Tree")
 
-DAG found all its modules
+^ _Airflow found all its modules_
 
 
 
 ![Alt text](/documentation/Airflow_DAG_pipeline.png?raw=true "DAG Code deployed")
 
-DAG pipeline
+^ _DAG pipeline_
 
 
 
 ![Alt text](/documentation/GCS_Composer_Environment.png?raw=true "Google Composer environment")
 
-Composer environment that handles Airflow and dependencies
+^ _Composer environment that handles Airflow and dependencies_
 
 
 
 ![Alt text](/documentation/GCS_Bucket.png?raw=true "Data loaded into GCS bucket")
 
-Google Storage bucket
+^ _Google Storage bucket_
 
-
+----------------------------------------------------------------------------------------------------------------------------------------
 
 #### Data pulled from Library of Congress API and pushed to a fresh MongoDB Atlas database:
 
 ![Alt text](/documentation/MongoDB_Loaded.png?raw=true "Data loaded into MongoDB")
 
-Data loaded into MongoDB
+^ _Data loaded into MongoDB_
 
 
 
 ![Alt text](/documentation/MongoIndex_Loaded.png?raw=true "Index data example")
 
-Index data example
+^_Index data example_
 
 
 
 ![Alt text](/documentation/MongoDetail_Loaded.png?raw=true "Details data example")
 
-Details data example
+^ _Details data example_
 
-
+----------------------------------------------------------------------------------------------------------------------------------------
 
 #### Resulting plot from database query and data transformation using Pandas and MatPlotLib:
 
 ![Alt text](/documentation/newspaper_freq.png?raw=true "Output plot example")
 
-Output plot example
+^ _Output plot example_
 
-
+----------------------------------------------------------------------------------------------------------------------------------------
 
 # Improvement Areas
 
