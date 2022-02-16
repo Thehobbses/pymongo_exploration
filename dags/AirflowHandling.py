@@ -1,10 +1,11 @@
 # Python Modules
 import datetime
-from airflow import models
+import airflow
+# from airflow import models
 from airflow.operators.python import PythonOperator
 
 # DAG modules
-from modules import gcs_test, MongoDBTools, PullFromMongoDB, PushToMongoDB, VisualizationHandling
+import MongoDBTools, PullFromMongoDB, PushToMongoDB, VisualizationHandling
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
@@ -17,9 +18,10 @@ default_args = {
     'retries': 1,
     'retry_delay': datetime.timedelta(minutes=5),
     'start_date': YESTERDAY,
+    'schedule_interval': '@daily'
 }
 
-with models.DAG(
+with airflow.models.DAG(
         'airflow_pipeline',
         catchup=False,
         default_args=default_args,
@@ -27,30 +29,25 @@ with models.DAG(
         schedule_interval=datetime.timedelta(days=1)) as dag:
 
     # run scripts
-    gcs_test = PythonOperator(
-        task_id='gcs_test',
-        python_callable=gcs_test.main(),
-        dag=dag)
-
     push_to_mongo = PythonOperator(
         task_id='push_to_mongo',
-        python_callable=PushToMongoDB.main(PushToMongoDB.mongo_database_list),
+        python_callable=PushToMongoDB.main,
         dag=dag)
 
     pull_from_mongo = PythonOperator(
         task_id='pull_from_mongo',
         depends_on_past=False,
-        python_callable=PullFromMongoDB.main(PullFromMongoDB.extract_database_list),
+        python_callable=PullFromMongoDB.main,
         retries=3,
         dag=dag)
 
     visualize_mongo_data = PythonOperator(
         task_id='visualize_mongo_data',
         depends_on_past=False,
-        python_callable=VisualizationHandling.main(),
+        python_callable=VisualizationHandling.main,
         retries=3,
         dag=dag)
 
 
 # Ordering the DAG. '>>' initiates task 2 after task 1 is finished
-gcs_test >> push_to_mongo >> pull_from_mongo >> visualize_mongo_data
+push_to_mongo >> pull_from_mongo >> visualize_mongo_data
