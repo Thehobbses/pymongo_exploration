@@ -53,4 +53,4 @@ with models.DAG(
 
 
 # Ordering the DAG. '>>' initiates task 2 after task 1 is finished
-push_to_mongo >> pull_from_mongo >> visualize_mongo_data
+gcs_test >> push_to_mongo >> pull_from_mongo >> visualize_mongo_data
