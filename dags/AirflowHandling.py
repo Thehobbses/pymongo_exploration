@@ -5,7 +5,7 @@ import airflow
 from airflow.operators.python import PythonOperator
 
 # DAG modules
-import MongoDBTools, PullFromMongoDB, PushToMongoDB, VisualizationHandling
+from modules import MongoDBTools, PullFromMongoDB, PushToMongoDB, VisualizationHandling
 
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
