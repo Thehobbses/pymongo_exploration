@@ -1,0 +1,17 @@
+Inst 1:
+conda activate airflow-medium
+airflow webserver -p 8080
+
+Inst 2:
+export AIRFLOW_HOME=/home/jackhobbs97/airflow-medium 
+cd airflow-medium 
+conda activate airflow-medium
+airflow db init
+airflow scheduler
+
+Inst: 3
+
+gsutil cp gs://jack-hobbs-mongodb-airflow-project-uswest1/*.txt .
+
+gcloud composer environments update airflow-composer-mongodb --update-pypi-packages-from-file requirements.txt --location us-west1
+
