@@ -1,2 +1,2 @@
 This folder exists just to make it easier to find the scripts
-In GCS/Airflow, these modules should be in the dags folder!
+In GCS/Airflow, these modules should be in <airflow-folders>/dags/modules
