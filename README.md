@@ -26,7 +26,7 @@ The pipeline is on a daily schedule, but that is easily adjusted in the DAG file
 
 # The Stuff You Can't See
 
-Clearly, this code relies heavily on MongoDB and Airflow. That means most of the fruits of my labor are not really apparent in the scripts alone. Below are some images that show what is being prodced from this code
+Clearly, this code relies heavily on MongoDB and Airflow. That means most of the fruits of my labor are not really apparent in the scripts alone. Below are some images that show what is being produced from this code
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
