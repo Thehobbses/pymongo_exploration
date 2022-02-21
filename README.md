@@ -89,10 +89,10 @@ Clearly, this code relies heavily on MongoDB and Airflow. That means most of the
 Of course, this is by no means an especially efficient process seeing as it pushes and pulls the same data on the same DAG flow with no purpose other than my own edification 
 
 Aside from redundant educational processes, there are a number of things I would change if this code had to be put into actual use:
- - User credentials for MongoDB are passed as string environmental variables, rather than an access token
+ - User credentials for MongoDB are passed as string environment variables, rather than an access token
    - I didn't want to pay for MongoDB Atlas :)
  - The visualization is rudimentary and flat, it isn't going to be useful for much since it's just a placeholder (i.e. I got the data here and had to do something with it!)
- - There's limited Exception handling, a skill I need to work on but ran out of time to really pursue
+ - There's limited exception handling, a skill I need to work on but ran out of time to really pursue
  - I need more practice with git and multi-module files: I think there's a lot of unneeded information passing back and forth
  - I'm sure I'm not using parallel processing to its full potential
  - There's likely a lot of room to improve efficiency, I need an experienced dev to help point me in the right direction
